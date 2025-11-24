@@ -9,4 +9,26 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_master_nodes=opensearch-node2
       - bootstrap.memory_lock=true #chan swapping
-      
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xms2g" # cau hinh heap size
+    ulimits:
+      memory_lock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+      volumes:
+        - opensearch-data1:/usr/share/opensearch/data1
+      ports:
+        - 9200:9200
+        - 9600:9600
+      networks:
+        - opensearch-net 
+  opensearch-node2:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch-node2
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node2
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2
+      - cluster.initial
