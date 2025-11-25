@@ -32,8 +32,8 @@ lyrics = [
     "Jingle all the way...",
     "Merry Christmas!",
     "Happy New Year!",
-    "To: Tech Lead & Python Team",
-    "From: Your AI Assistant"
+    "To: who Read this",
+    "From: EurusDevSec (Hoàng)"
 ]
 
 snow_buffer = [" " * width for _ in range(n + 3)] # Buffer dài hơn để bao cả phần gốc
@@ -116,7 +116,7 @@ def main():
             update_snow()
             draw_Christmas(tick)
             tick += 1
-            time.sleep(0.1)
+            time.sleep(0.2)
     except KeyboardInterrupt:
         print("\n\033[31mGiáng sinh vui vẻ nhé!\033[0m")
 
