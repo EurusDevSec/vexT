@@ -62,13 +62,13 @@ def draw_tree():
 
 
 
-    #  than cay 
+    #  body tree 
     for i  in range(2):
         if i ==1:
             print(" " * (HEIGHT -2)  + "\033[32m||\033[0m" + "🎁" + " " * 3 + "☃️")
         else:
             print(" " * (HEIGHT -2 ) + "\033[32m||\033[0m")
-
+    # ground
 
 
 def main():
