@@ -2,10 +2,26 @@ import os
 import time
 import random
 
-colors = [
-    "\033[30m","\033[31m","\033[32m","\033[33m","\033[34m","\033[35m"
-]
+# --- CẤU HÌNH (CONFIG) ---
+n = 12  # Cây cao hơn xíu cho đẹp
+width = 40 # Bầu trời rộng hơn
 
+# Palette màu
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+BLUE = "\033[34m"
+PURPLE = "\033[35m"
+CYAN = "\033[36m"
+WHITE = "\033[97m"
+GREY = "\033[90m"
+RESET = "\033[0m"
+
+colors = [RED, GREEN, YELLOW, BLUE, PURPLE, CYAN]
+
+# Danh sách vật trang trí (Lá nhiều hơn quả châu)
+# Tỷ lệ: 70% là lá (*), 30% là quả châu (o, @, O)
+ornaments = ['*'] * 7 + ['o', '@', 'O']
 
 lyrics = [
     "Jingle bells, jingle bells",
@@ -16,60 +32,93 @@ lyrics = [
     "Jingle all the way...",
     "Merry Christmas!",
     "Happy New Year!",
-    "To: Tech Lead",
-    "From: Python"
+    "To: Tech Lead & Python Team",
+    "From: Your AI Assistant"
 ]
 
-n=10
-def draw_Chrismas(tick):
-    char_budget = tick
+snow_buffer = [" " * width for _ in range(n + 3)] # Buffer dài hơn để bao cả phần gốc
+
+def update_snow():
+    """Logic tạo tuyết rơi (Queue)"""
+    snow_buffer.pop()
+    new_row = ""
+    for _ in range(width):
+        # 15% khả năng có tuyết rơi
+        rand = random.random()
+        if rand < 0.05: new_row += "." 
+        elif rand < 0.1: new_row += "+" # Thêm bông tuyết hình dấu cộng cho đa dạng
+        else: new_row += " "
+    snow_buffer.insert(0, new_row)
+
+def draw_Christmas(tick):
+    char_budget = tick 
+
+    # --- 1. VẼ TÁN CÂY ---
     for i in range(n):
-        spaces = " "*(n-1-i)
-        print(spaces,end="")
-        for _ in range(2*i+1):
-            color = random.choice(colors)
-            print(color + "*" + "\033[0m",end="")
+        # Lớp tuyết nền bên trái
+        padding_len = n - 1 - i
+        print(GREY + snow_buffer[i][:padding_len] + RESET, end="")
+        
+        # LOGIC VẼ CÂY & TRANG TRÍ
+        if i == 0:
+            # Đỉnh cây: Luôn là ngôi sao vàng to
+            print(YELLOW + "★" + RESET, end="") 
+        else:
+            # Thân cây: Vẽ từng ký tự
+            for _ in range(2 * i + 1):
+                # Chọn ngẫu nhiên vật trang trí (lá hoặc quả)
+                char = random.choice(ornaments)
+                color = random.choice(colors)
+                
+                # Nếu là lá (*) thì ưu tiên màu xanh cho giống cây thật
+                if char == '*':
+                    if random.random() < 0.7: color = GREEN # 70% lá màu xanh
+                
+                print(color + char + RESET, end="")
+        
+        # Lớp tuyết nền bên phải
+        padding_right_len = n - i + 5
+        snow_right = snow_buffer[i][padding_len : padding_len + padding_right_len]
+        print(GREY + snow_right + RESET, end="")
 
-        padding_right = " " * (n-i + 5)
-        print(padding_right,end="")
-
-
+        # LOGIC CHỮ CHẠY (Giữ nguyên logic Happy Path)
         if i < len(lyrics):
             line = lyrics[i]
-            line_len = len(line)
-
-            if char_budget >= line_len:
-                # Trường hợp 1: Ngân sách dư dả -> In hết dòng này
-                print("\033[32m" + line + "\033[0m", end="")
-                char_budget -= line_len # Trừ đi số chữ đã in để tính cho dòng sau
+            if char_budget >= len(line):
+                print(GREEN + line + RESET, end="")
+                char_budget -= len(line)
             elif char_budget > 0:
-                # Trường hợp 2: Ngân sách còn ít -> In dang dở
-                print("\033[32m" + line[:char_budget] + "\033[0m", end="")
-                char_budget = 0 # Xài hết vốn rồi
-            else:
-                # Trường hợp 3: Hết ngân sách -> Không in gì cả
-                pass
-        
-        # In ra phần chuỗi đã được "cắt"
-  
+                print(GREEN + line[:char_budget] + RESET, end="")
+                char_budget = 0
+            
+        print() # Xuống dòng
 
-
-
-        print()
-
+    # --- 2. VẼ THÂN CÂY & MẶT ĐẤT ---
+    # Thân cây
     for i in range(2):
-        print(" "*(n-2) + "\033[32m||\033[0m")
+        print(GREY + snow_buffer[n+i][:n-2] + RESET, end="") # Tuyết bao quanh thân
+        print(YELLOW + "|||" + RESET, end="")
+        print(GREY + snow_buffer[n+i][n+1:n+10] + RESET) # Tuyết bên phải thân
+
+    # Mặt đất (Footer)
+    ground_snow = snow_buffer[n+2][:n-4]
+    print(GREY + ground_snow + WHITE + "~^~^~^~^~^~^~^~" + RESET) 
 
 
 def clear():
-    os.system('cls' if os.name=='nt' else 'clear')
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def main():
-    tick=0
-    while True:
-        clear()
-        draw_Chrismas(tick)
-        tick+=1
-        time.sleep(0.2)
+    tick = 0
+    try:
+        while True:
+            clear()
+            update_snow()
+            draw_Christmas(tick)
+            tick += 1
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("\n\033[31mGiáng sinh vui vẻ nhé!\033[0m")
 
 if __name__ == "__main__":
     main()
