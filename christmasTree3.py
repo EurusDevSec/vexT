@@ -15,6 +15,18 @@ COLORS=[
     "\033[35m",
 ]
 
+
+lyrics=[
+    "I don't want a lot for Christmas",
+    "There is just one thing I need",
+    "I don't care about the presents underneath the Christmas tree",
+    "I just want you for my own",
+    "More than you could ever know",
+    "Make my wish come true",
+    "All I want for Christmas is you"
+]
+
+
 # bau troi 
 WIDTH = 20
 snow_buffer = [" " * WIDTH for _ in range(HEIGHT + 3)]
