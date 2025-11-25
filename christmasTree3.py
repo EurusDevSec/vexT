@@ -48,16 +48,22 @@ def clear():
 
 
 
-def draw_tree():
-    
+def draw_tree(tick):
+    budget = tick //2
     for i in range(HEIGHT):
+
+        #SNOW LEFT
         padding = HEIGHT - 1  -i
         snow_layer = snow_buffer[i][:padding] 
         print("\033[90m" + snow_layer + "\033[0m", end  ="" )
         # print(" " * padding , end = "")
+        #CHRISTMAS TREE
         for _ in range(2 * i + 1):
             color = random.choice(COLORS)
             print(color +  "*"  + "\033[0m", end = "")
+        
+        # SNOW RIGHT (NEW)
+        
         print()
 
 
@@ -72,12 +78,14 @@ def draw_tree():
 
 
 def main():
+    tick=0 # clock
     try:
         while True:
 
             clear()
             update_snow()
-            draw_tree()
+            draw_tree(tick)
+            tick+=1
             time.sleep(0.3)
     except KeyboardInterrupt:
         print("\033[34mMerryChrismas 🎁")
