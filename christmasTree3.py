@@ -49,22 +49,36 @@ def clear():
 
 
 def draw_tree(tick):
+
     budget = tick //2
+
     for i in range(HEIGHT):
 
         #SNOW LEFT
-        padding = HEIGHT - 1  -i
-        snow_layer = snow_buffer[i][:padding] 
+
+        left_padding = HEIGHT - 1  -i
+        snow_layer = snow_buffer[i][:left_padding] 
         print("\033[90m" + snow_layer + "\033[0m", end  ="" )
+
         # print(" " * padding , end = "")
         #CHRISTMAS TREE
+
         for _ in range(2 * i + 1):
             color = random.choice(COLORS)
             print(color +  "*"  + "\033[0m", end = "")
         right_padding=(HEIGHT -i) + 5
+
         # SNOW RIGHT (NEW)
-        snow_layer_right=snow_buffer[i][padding:padding+right_padding]
+        snow_layer_right=snow_buffer[i][left_padding:left_padding+right_padding]
         print("\033[90m" + snow_layer_right + "\033[0m", end = "")
+
+
+        # DRAW TEXT
+        if i < len(lyrics):
+            text = lyrics[i]
+
+            if budget > 0:
+                print("\033[32m" + text[:budget] + "\033[0m", end = "")
         print()
 
 
