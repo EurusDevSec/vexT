@@ -61,9 +61,10 @@ def draw_tree(tick):
         for _ in range(2 * i + 1):
             color = random.choice(COLORS)
             print(color +  "*"  + "\033[0m", end = "")
-        
+        right_padding=(HEIGHT -i) + 5
         # SNOW RIGHT (NEW)
-        
+        snow_layer_right=snow_buffer[i][padding:padding+right_padding]
+        print("\033[90m" + snow_layer_right + "\033[0m", end = "")
         print()
 
 
