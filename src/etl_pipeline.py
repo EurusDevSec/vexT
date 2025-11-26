@@ -21,8 +21,16 @@ def normalize_data(file_path):
     print(df)
     df["category"] = df["category"].fillna("Unknown")
     df["title"] = df["title"].fillna("Unknown")
+
+    # Clear garbage
+    
     print(df["category"])
-    print(df["title"])
+    df["category"] = df["category"].apply(lambda x: str(x).strip().title())
+    print(df["category"])
+    
+  
+
+
 def main():
     normalize_data(file_path)
     
