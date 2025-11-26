@@ -23,16 +23,51 @@ def normalize_data(file_path):
     df["title"] = df["title"].fillna("Unknown")
 
     # Clear garbage
-    
+
     print(df["category"])
+    # "  electronics   " -> "Electronics"
     df["category"] = df["category"].apply(lambda x: str(x).strip().title())
     print(df["category"])
     
-  
+    df["publish_date"] = pd.to_datetime(df["publish_date"], errors="coerce")
+    print(df["publish_date"])
 
+    #filer garbage
+
+    init_count = len(df)
+    df = df.dropna(subset=["content_text"])
+    print(f"Cleared {init_count - len(df)} lines not have descrip content")
+
+    return df 
+
+
+
+def generate_vectors(df):
+    print("🧠 Đang tạo Vector Embeddings (Vectorization)...")
+    
+    # Lấy danh sách text để đưa vào model
+    sentences = df['content_text'].tolist()
+    
+    # Batch Processing: Thư viện này tự động xử lý batch ngầm bên dưới
+    embeddings = model.encode(sentences, show_progress_bar=True)
+    
+    # Gán vector ngược lại vào DataFrame
+    # Lưu ý: OpenSearch cần vector dạng List, không phải Numpy Array
+    df['embedding'] = list(embeddings)
+    
+    print(f"✅ Đã tạo vector thành công cho {len(df)} dòng dữ liệu.")
+    return df
 
 def main():
-    normalize_data(file_path)
+
+    #1. Ingestion and normalization
+    df_clean = normalize_data(file_path)
+
+    #2. Vectorization
+
+    df_final=generate_vectors(df_clean)
+    
+    #3. Result
     
     
 
