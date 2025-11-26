@@ -153,7 +153,7 @@ def draw_tree(tick):
 def init_music():
     pygame.mixer.init()
     code_path = os.path.dirname(os.path.abspath(__file__))
-    song_path = os.path.join(code_path,"res","christmas_song.mp3")
+    song_path = os.path.join(code_path,"res","ChristmasSong.mp3")
     print(song_path)
     try:
         pygame.mixer.music.load(song_path)
