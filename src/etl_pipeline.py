@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np 
-# from sentence_transformer import SentenceTransformer
+from sentence_transformers import SentenceTransformer
 import os
 
 #CONFIG
 
-# print("Loading model AI... ")
-# model = SentenceTransformer('all-MiniLM-L6-v2')
+print("Loading model AI... ")
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
 dir_script = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,19 +18,19 @@ def normalize_data(file_path):
     # print(df.head())
     
     df =pd.read_csv(file_path)
-    print(df)
+    # print(df)
     df["category"] = df["category"].fillna("Unknown")
     df["title"] = df["title"].fillna("Unknown")
 
     # Clear garbage
 
-    print(df["category"])
+    # print(df["category"])
     # "  electronics   " -> "Electronics"
     df["category"] = df["category"].apply(lambda x: str(x).strip().title())
-    print(df["category"])
+    # print(df["category"])
     
     df["publish_date"] = pd.to_datetime(df["publish_date"], errors="coerce")
-    print(df["publish_date"])
+    # print(df["publish_date"])
 
     #filer garbage
 
@@ -59,20 +59,23 @@ def generate_vectors(df):
     return df
 
 def main():
+    try:
+        #1. Ingestion and normalization
+        df_clean = normalize_data(file_path)
 
-    #1. Ingestion and normalization
-    df_clean = normalize_data(file_path)
+        #2. Vectorization
 
-    #2. Vectorization
+        df_final=generate_vectors(df_clean)
+        
+        #3. Result
 
-    df_final=generate_vectors(df_clean)
-    
-    #3. Result
-    
-    
+        print("\n Result after process")
+        print(df_final[['title', 'category', 'publish_date']].head())
+        print(f"\nKích thước Vector mẫu: {len(df_final['embedding'].iloc[0])} chiều")
 
+        df_final.to_json('product_ready.json',orient='records')
 
-
-
+    except KeyboardInterrupt:
+        print("System are stopped")
 if __name__ == "__main__":
     main()
