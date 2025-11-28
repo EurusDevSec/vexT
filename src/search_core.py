@@ -10,4 +10,8 @@ client = OpenSearch(
     use_ssl=False
 )
 
-I
+INDEX_NAME = "vext_products"
+
+# Load model để tạo vector cho câu truy vấn của người dùng
+print("⏳ Đang tải model AI cho tìm kiếm...")
+model = SentenceTransformer('all-MiniLM-L6-v2')
