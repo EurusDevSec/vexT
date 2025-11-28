@@ -9,7 +9,8 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_master_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true #chan swapping
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g" # cau hinh heap size
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Giam xuong 512MB cho moi truong Dev (Laptop)
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=StrongPassword123! # Mat khau admin bat buoc
     ulimits:
       memlock:
         soft: -1
@@ -33,7 +34,8 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_master_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=StrongPassword123! # Mat khau admin bat buoc
     ulimits:
       memlock:
         soft: -1
