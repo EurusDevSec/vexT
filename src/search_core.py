@@ -119,22 +119,40 @@ def ingest_data():
     except FileNotFoundError:
         print(f"❌ Không tìm thấy file {file_path}. Hãy chạy etl_pipeline.py trước!")
 
-def search_hybrid(user_query, min_price=0):
+def search_hybrid(user_query, min_price=0, k=10):
+    """Thực hiện hybrid search và trả về list hits (list[dict]).
+
+    Parameters
+    ----------
+    user_query : str
+        Câu truy vấn người dùng.
+    min_price : int|float
+        Ngưỡng giá tối thiểu lọc trước (metadata filter).
+    k : int
+        Số lượng kết quả tối đa trả về.
+
+    Returns
+    -------
+    list
+        Danh sách các hits; [] nếu lỗi hoặc không có kết quả.
+    """
     print(f"\n🔎 Đang tìm kiếm: '{user_query}' (Giá > {min_price})...")
-    
-    # B1: Vector hóa
-    query_vector = model.encode(user_query).tolist()
-    
-    # B2: Query DSL
+
+    # Vector hóa truy vấn
+    try:
+        query_vector = model.encode(user_query).tolist()
+    except Exception as e:
+        print(f"❌ Lỗi embedding truy vấn: {e}")
+        return []
+
+    # Query DSL (bool + should: text + vector, filter: price)
     query_body = {
-        "size": 3,
+        "size": k,
         "query": {
             "bool": {
-                "filter": {
-                    "range": {
-                        "price": {"gte": min_price}
-                    }
-                },
+                "filter": [
+                    {"range": {"price": {"gte": min_price}}}
+                ],
                 "should": [
                     {
                         "multi_match": {
@@ -147,33 +165,38 @@ def search_hybrid(user_query, min_price=0):
                         "knn": {
                             "embedding": {
                                 "vector": query_vector,
-                                "k": 3,
+                                "k": k,
                                 "boost": 0.7
                             }
                         }
                     }
-                ]
+                ],
+                "minimum_should_match": 1
             }
         }
     }
-    
-    # B3: Thực thi
+
+    # Thực thi
     try:
         response = client.search(index=INDEX_NAME, body=query_body)
+        hits = response.get("hits", {}).get("hits", [])
         print(f"--- KẾT QUẢ TÌM KIẾM CHO: '{user_query}' ---")
-        if not response['hits']['hits']:
+        if not hits:
             print("   (Không tìm thấy kết quả nào)")
-        
-        for hit in response['hits']['hits']:
-            score = hit['_score']
-            source = hit['_source']
-            print(f"⭐ Score: {score:.4f} | 🏷️ {source['title']} | 💰 {source['price']:,.0f} VNĐ")
-            print(f"   ℹ️ {source['content_text'][:100]}...") 
+            return []
+        for hit in hits[:3]:  # In ra tối đa 3 dòng demo
+            score = hit.get('_score', 0)
+            source = hit.get('_source', {})
+            print(f"⭐ Score: {score:.4f} | 🏷️ {source.get('title','N/A')} | 💰 {source.get('price',0):,.0f} VNĐ")
+            preview = source.get('content_text', '')[:100]
+            print(f"   ℹ️ {preview}...")
             print("-" * 30)
+        return hits
     except Exception as e:
         print(f"❌ Lỗi tìm kiếm: {e}")
+        return []
 
-# --- PHẦN CHẠY CHÍNH (MAIN BLOCK) ---
+# ---  MAIN BLOCK ---
 if __name__ == "__main__":
     try:
         # 1. Tạo cấu trúc bảng (Mapping)
