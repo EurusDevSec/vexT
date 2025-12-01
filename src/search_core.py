@@ -68,7 +68,7 @@ def create_index():
                     "method": {
                         "name": "hnsw",             # Thuật toán SOTA
                         "space_type": "cosinesimil",
-                        "engine": "nmslib",
+                        "engine": "faiss",
                         "parameters": {
                             "ef_construction": 128,
                             "m": 16
