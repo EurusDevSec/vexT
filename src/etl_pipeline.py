@@ -1,139 +1,118 @@
 import pandas as pd
-import numpy as np 
-# Chú ý: Thư viện tên là sentence_transformers (có chữ s ở cuối)
-from sentence_transformers import SentenceTransformer 
+from sentence_transformers import SentenceTransformer
 import os
 
-# --- CẤU HÌNH ---
-print("Loading model AI... ")
+# --- CẤU HÌNH DỮ LIỆU THỰC (REAL WORLD CONFIG) ---
+# 1. Đường dẫn file CSV tải từ Kaggle (Đặt file này vào thư mục res/)
+# Ví dụ bạn tải file tên là 'flipkart_com-ecommerce_sample.csv'
+CSV_FILENAME = "flipkart_data.csv" 
+
+# 2. BẢN ĐỒ ÁNH XẠ CỘT (MAPPING SCHEMA)
+# Bên Trái: Tên cột trong hệ thống VexT (CỐ ĐỊNH)
+# Bên Phải: Tên cột trong file CSV tải về (THAY ĐỔI TÙY FILE)
+COLUMN_MAPPING = {
+    "title": "product_name",        # Trong CSV Kaggle cột tên là product_name
+    "price": "retail_price",        # Trong CSV Kaggle cột tên là retail_price
+    "category": "product_category_tree", 
+    "content_text": "description",  # Cột mô tả dùng để tạo vector
+    "publish_date": "crawl_timestamp" # Ngày tháng (nếu có)
+}
+
+# 3. GIỚI HẠN DỮ LIỆU (QUAN TRỌNG)
+# Vector hóa tốn nhiều CPU. Để demo mượt, hãy giới hạn 2000-5000 dòng.
+# Đừng tham load cả 100k dòng nếu không có GPU.
+DATA_LIMIT = 5000 
+
+print("⏳ Loading model AI...")
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Xác định đường dẫn file
-dir_script = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Tạo thư mục res nếu chưa có
-os.makedirs(os.path.join(dir_script, "res"), exist_ok=True)
-file_path = os.path.join(dir_script, "res", "products.csv")
-
-# --- HÀM TẠO DỮ LIỆU MẪU (Fix lỗi CSV của bạn) ---
-def create_dummy_data():
-    print("🛠️ Đang tạo file dữ liệu mẫu chuẩn (products.csv)...")
-    data = [
-        {
-            "id": 1,
-            "title": "Laptop Dell XPS 13",
-            "category": "Electronics",
-            "publish_date": "2023-10-01",
-            "price": 25000000,
-            "content_text": "Máy tính xách tay Dell XPS 13 màn hình vô cực, chip Intel Core i7, RAM 16GB, SSD 512GB. Thiết kế mỏng nhẹ doanh nhân."
-        },
-        {
-            "id": 2,
-            "title": "iPhone 15 Pro Max",
-            "category": "Mobile",
-            "publish_date": "2023-09-15",
-            "price": 30000000,
-            "content_text": "Điện thoại iPhone 15 Pro Max vỏ titan, chip A17 Pro, camera 48MP zoom quang học 5x. Màu xanh titan tự nhiên."
-        },
-        {
-            "id": 3,
-            "title": "Chuột Logitech MX Master 3",
-            "category": "Accessories",
-            "publish_date": "2023-01-20",
-            "price": 2500000,
-            "content_text": "Chuột không dây Logitech MX Master 3S, thiết kế công thái học, cuộn siêu nhanh MagSpeed, pin sạc USB-C."
-        },
-        {
-            "id": 4,
-            "title": "Sách Clean Code",
-            "category": "Books",
-            "publish_date": None, # Test dữ liệu thiếu ngày
-            "price": 500000,
-            "content_text": "Cuốn sách Clean Code của Robert C. Martin hướng dẫn cách viết mã sạch, dễ bảo trì và tối ưu cho lập trình viên."
-        },
-        {
-            "id": 5,
-            "title": None, # Test thiếu tiêu đề
-            "category": "Unknown",
-            "publish_date": "2022-12-12",
-            "price": 0,
-            "content_text": "Dữ liệu bị lỗi tiêu đề nhưng vẫn có nội dung mô tả để test vector."
-        }
-    ]
-    # Tạo DataFrame và lưu ra CSV chuẩn
-    df = pd.DataFrame(data)
-    df.to_csv(file_path, index=False, encoding='utf-8')
-    print("✅ Đã tạo file products.csv thành công!")
-
-# --- CÁC HÀM XỬ LÝ (ETL) ---
-def normalize_data(file_path):
-    print(f"🔄 Đang đọc dữ liệu từ: {file_path}")
-    df = pd.read_csv(file_path)
+def load_and_map_data(file_path):
+    print(f"🔄 Đang đọc file Big Data: {file_path}")
     
-    # Xử lý giá trị thiếu (Fill NA)
-    df["category"] = df["category"].fillna("Unknown")
-    df["title"] = df["title"].fillna("Unknown Product")
+    # Đọc CSV
+    try:
+        df = pd.read_csv(file_path)
+    except FileNotFoundError:
+        print("❌ Lỗi: Không tìm thấy file CSV. Hãy tải từ Kaggle và bỏ vào thư mục res/")
+        return None
 
-    # Chuẩn hóa chuỗi (String Cleaning)
-    df["category"] = df["category"].apply(lambda x: str(x).strip().title())
+    # Đổi tên cột theo Mapping
+    # Đảo ngược dict để dùng hàm rename: {Tên_Cũ: Tên_Mới}
+    rename_dict = {v: k for k, v in COLUMN_MAPPING.items()}
+    df = df.rename(columns=rename_dict)
     
-    # Chuẩn hóa ngày tháng (Date Parsing)
-    # errors='coerce' nghĩa là: nếu lỗi thì biến thành NaT (trống) chứ không báo lỗi dừng chương trình
-    df["publish_date"] = pd.to_datetime(df["publish_date"], errors="coerce")
+    # Kiểm tra xem có đủ cột quan trọng không
+    required_cols = ["title", "content_text"]
+    for col in required_cols:
+        if col not in df.columns:
+            print(f"❌ File CSV thiếu cột quan trọng map vào '{col}'. Kiểm tra lại COLUMN_MAPPING!")
+            return None
 
-    # Lọc rác (Filter Garbage)
-    # Chỉ xóa những dòng KHÔNG CÓ nội dung mô tả (vì không tạo vector được)
-    init_count = len(df)
-    df = df.dropna(subset=["content_text"])
+    # Chỉ lấy các cột cần thiết cho VexT
+    available_cols = [c for c in COLUMN_MAPPING.keys() if c in df.columns]
+    df = df[available_cols]
+
+    return df
+
+def clean_data(df):
+    print(f"🧹 Đang làm sạch {len(df)} dòng dữ liệu...")
     
-    if init_count - len(df) > 0:
-        print(f"⚠️ Đã lọc bỏ {init_count - len(df)} dòng thiếu nội dung mô tả.")
+    # 1. Giới hạn số lượng (Sampling)
+    if len(df) > DATA_LIMIT:
+        print(f"⚠️ Dữ liệu quá lớn ({len(df)} dòng). Lấy ngẫu nhiên {DATA_LIMIT} dòng để demo.")
+        df = df.sample(n=DATA_LIMIT, random_state=42)
+    
+    # 2. Xử lý Giá tiền (Lọc bỏ chữ, chỉ lấy số)
+    # Ví dụ Kaggle hay ghi giá là "20,000 USD" -> cần chuyển thành số
+    if 'price' in df.columns:
+        # Ép kiểu số, lỗi thành NaN
+        df['price'] = pd.to_numeric(df['price'], errors='coerce')
+        df['price'] = df['price'].fillna(0) # Giá rỗng thì cho bằng 0
+    
+    # 3. Xử lý Category (Làm sạch chuỗi)
+    if 'category' in df.columns:
+        # Lấy danh mục cha đầu tiên, loại bỏ ký tự thừa
+        df['category'] = df['category'].astype(str).apply(lambda x: x.replace('["', '').replace('"]', '').split(">>")[0].strip())
+    else:
+        df['category'] = "General"
 
-    return df 
+    # 4. Xử lý Null ở Description
+    df = df.dropna(subset=['content_text'])
+    df['content_text'] = df['content_text'].astype(str)
+    
+    # 5. Xử lý Ngày tháng (Nếu có)
+    if 'publish_date' in df.columns:
+         df['publish_date'] = pd.to_datetime(df['publish_date'], errors='coerce')
+    
+    return df
 
 def generate_vectors(df):
-    print("🧠 Đang tạo Vector Embeddings (Vectorization)...")
+    print(f"🧠 Đang Vector hóa {len(df)} sản phẩm (Việc này có thể mất vài phút)...")
     
-    # Lấy danh sách text
     sentences = df['content_text'].tolist()
     
-    # Tạo vector (Batch process)
-    embeddings = model.encode(sentences, show_progress_bar=True)
+    # Batch size = 64 giúp chạy nhanh hơn
+    embeddings = model.encode(sentences, batch_size=64, show_progress_bar=True)
     
-    # Chuyển về dạng List để OpenSearch hiểu
     df['embedding'] = list(embeddings)
-    
-    print(f"✅ Đã tạo vector thành công cho {len(df)} dòng dữ liệu.")
     return df
 
 def main():
-    try:
-        # BƯỚC 0: TỰ ĐỘNG TẠO DATA CHUẨN
-        create_dummy_data()
+    # Setup đường dẫn
+    dir_script = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    input_path = os.path.join(dir_script, "res", CSV_FILENAME)
+    output_path = os.path.join(dir_script, "res", "flipkart_data_ready.json")
 
-        # BƯỚC 1: ETL
-        df_clean = normalize_data(file_path)
-
-        # BƯỚC 2: VECTOR HÓA
+    # Pipeline
+    df = load_and_map_data(input_path)
+    if df is not None:
+        df_clean = clean_data(df)
         df_final = generate_vectors(df_clean)
         
-        # BƯỚC 3: KẾT QUẢ
-        print("\n--- KẾT QUẢ KIỂM TRA (SAMPLE) ---")
-        # In ra 3 cột quan trọng để check xem còn bị lệch không
-        print(df_final[['title', 'category', 'price', 'publish_date']].head())
-        
-        # Kiểm tra kích thước vector dòng đầu tiên
-        vector_dim = len(df_final['embedding'].iloc[0])
-        print(f"\n📏 Kích thước Vector: {vector_dim} chiều (Chuẩn SOTA)")
-
-        # Lưu kết quả ra JSON để dùng cho bước sau
-        output_path = os.path.join(dir_script, "res", "product_ready.json")
+        # Lưu kết quả
         df_final.to_json(output_path, orient='records', date_format='iso')
-        print(f"💾 Đã lưu kết quả vào: {output_path}")
-
-    except KeyboardInterrupt:
-        print("System stopped by user")
-    except Exception as e:
-        print(f"❌ Lỗi: {e}")
+        print(f"\n✅ XONG! Đã lưu {len(df_final)} sản phẩm vector hóa vào: {output_path}")
+        print("👉 Bây giờ hãy chạy lại 'uv run search_core.py' để nạp dữ liệu mới này vào OpenSearch!")
 
 if __name__ == "__main__":
     main()

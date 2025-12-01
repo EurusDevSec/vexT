@@ -94,7 +94,8 @@ def create_index():
 def ingest_data():
     # Đường dẫn file json
     dir_script = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    file_path = os.path.join(dir_script, "res", "product_ready.json")
+    # Cập nhật tên file mới
+    file_path = os.path.join(dir_script, "res", "flipkart_data_ready.json")
     
     print(f"🔄 Đang đọc dữ liệu từ {file_path}...")
     try:
