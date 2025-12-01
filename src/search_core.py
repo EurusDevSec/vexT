@@ -1,4 +1,4 @@
-import json  # <--- ĐÃ THÊM VÀO ĐÂY
+import json  
 import os
 from opensearchpy import OpenSearch, helpers
 from sentence_transformers import SentenceTransformer
