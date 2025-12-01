@@ -1,1 +1,1 @@
-# This is Test README.md
+# vexT - Hybrid Search & RAG
