@@ -62,3 +62,15 @@ with st.sidebar:
     st.markdown("---")
     st.caption("Powered by OpenSearch & gemini")
 
+# MAIN AREA: CHAT & SEARCH
+st.title("🔍 VexT: Hệ thống Tìm kiếm Lai & RAG")
+st.markdown("simple question, pro answer")
+
+# input text
+user_query = st.text_input("Bạn đang tìm kiếm sản phẩm gì?", placeholder="Ví dụ máy tính chạy Docker giá rẻ...")
+
+if st.button("Search"):
+    if not user_query:
+        st.warning("Vui long nhap cau hoi!")
+    else:
+        
