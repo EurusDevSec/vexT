@@ -107,7 +107,7 @@ def generate_vectors(df):
 
 def main():
     try:
-        # BƯỚC 0: TỰ ĐỘNG TẠO DATA CHUẨN (Fix lỗi của bạn)
+        # BƯỚC 0: TỰ ĐỘNG TẠO DATA CHUẨN
         create_dummy_data()
 
         # BƯỚC 1: ETL
