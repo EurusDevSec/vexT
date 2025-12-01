@@ -11,6 +11,7 @@ tests/
 .venv/
 .venv
 
+.env
 res
 
 chrismasTree.py 
