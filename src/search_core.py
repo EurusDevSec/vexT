@@ -26,7 +26,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 def create_index():
     print(f"🛠️ Đang thiết lập INDEX_MAPPING cho {INDEX_NAME}...")
 
-    # Define data structure (schema)
+    # Dinh nghia cau truc data (schema)
     index_body = {
         "settings": {
             "index": {
