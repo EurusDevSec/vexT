@@ -56,6 +56,7 @@ GOOGLE_API_KEY=your_google_api_key_here
 Dự án sử dụng `uv` để quản lý gói. Nếu chưa có `uv`, bạn có thể cài đặt hoặc dùng `pip`.
 
 **Cách 1: Dùng uv (Khuyên dùng)**
+
 ```bash
 # Tại thư mục gốc
 cd src
@@ -63,6 +64,7 @@ uv sync
 ```
 
 **Cách 2: Dùng pip**
+
 ```bash
 pip install -r requirements.txt
 # Hoặc cài thủ công các thư viện trong pyproject.toml
@@ -81,7 +83,8 @@ Chạy OpenSearch bằng Docker Compose từ thư mục `infra`:
 cd infra
 docker-compose up -d
 ```
-*Đợi khoảng 1-2 phút để OpenSearch khởi động hoàn tất.*
+
+_Đợi khoảng 1-2 phút để OpenSearch khởi động hoàn tất._
 
 ### Bước 2: Chuẩn bị dữ liệu (ETL)
 
