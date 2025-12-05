@@ -77,70 +77,139 @@ pip install opensearch-py sentence-transformers pandas streamlit google-generati
 
 ### Bước 1: Khởi động OpenSearch
 
-Chạy OpenSearch bằng Docker Compose từ thư mục `infra`:
+# vexT — Hybrid Search and RAG
+
+![Project Banner](image.png)
+
+vexT is a prototype hybrid search and retrieval-augmented generation (RAG) system that combines keyword search (BM25) with semantic vector search to deliver context-aware answers over product data. The project demonstrates an end-to-end pipeline: ETL, embedding, vector indexing (OpenSearch + FAISS), hybrid retrieval, and answer generation via Google Gemini.
+
+Key components:
+
+- OpenSearch (vector-enabled) as the search backend
+- SentenceTransformers (`all-MiniLM-L6-v2`) for embeddings
+- Google Gemini (via Google GenAI SDK) for RAG response generation
+- Streamlit for a simple web UI
+
+---
+
+## Features
+
+- Hybrid retrieval: BM25 (text) + approximate k-NN (vector) using HNSW + FAISS
+- RAG: contextual answer synthesis using retrieved documents
+- ETL pipeline to normalize and convert product CSV into indexed documents
+- Streamlit demo app for interactive search and question answering
+
+---
+
+## Requirements
+
+- Docker Desktop (to run the OpenSearch cluster)
+- Python 3.12+
+- A Google Cloud API key with access to the GenAI endpoint (set via `GOOGLE_API_KEY`)
+
+---
+
+## Quickstart
+
+Follow these steps to run the project locally.
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/EurusDevSec/vexT.git
+cd vexT
+```
+
+2. Configure environment variables
+
+Create a `.env` file in the repository root with your Google API key:
+
+```env
+GOOGLE_API_KEY=your_google_api_key_here
+```
+
+3. Install Python dependencies
+
+The project uses `uv` for dependency management; you can use it if available, otherwise use `pip`.
+
+Recommended (uv):
+
+```bash
+cd src
+uv sync
+```
+
+Alternative (pip):
+
+```bash
+pip install -r requirements.txt
+# or install packages manually from src/pyproject.toml
+```
+
+4. Start OpenSearch
+
+From the `infra/` directory:
 
 ```bash
 cd infra
 docker-compose up -d
 ```
 
-_Đợi khoảng 1-2 phút để OpenSearch khởi động hoàn tất._
+Allow 1–2 minutes for OpenSearch to fully initialize.
 
-### Bước 2: Chuẩn bị dữ liệu (ETL)
+5. Run the ETL pipeline
 
-Đảm bảo bạn đã có file dữ liệu `flipkart_data.csv` trong thư mục `res/`.
-Sau đó chạy pipeline để xử lý dữ liệu và tạo file JSON trung gian:
+Place your `flipkart_data.csv` file inside the `res/` folder, then run:
 
 ```bash
-# Từ thư mục gốc
+# from project root
 cd src
-uv run etl_pipeline.py
-# Hoặc: python etl_pipeline.py
+uv run etl_pipeline.py   # or: python etl_pipeline.py
 ```
 
-### Bước 3: Đánh chỉ mục (Indexing)
+This will normalize the CSV, generate embeddings, and export a JSON file ready for indexing.
 
-Nạp dữ liệu đã xử lý vào OpenSearch:
+6. Index data into OpenSearch
 
 ```bash
-# Từ thư mục src
-uv run search_core.py
-# Hoặc: python search_core.py
+cd src
+uv run search_core.py    # or: python search_core.py
 ```
 
-### Bước 4: Khởi chạy ứng dụng
-
-Mở giao diện web Streamlit:
+7. Launch the demo UI
 
 ```bash
-# Từ thư mục src
-uv run streamlit run app.py
-# Hoặc: streamlit run app.py
+cd src
+uv run streamlit run app.py   # or: streamlit run app.py
 ```
 
-Truy cập vào địa chỉ hiển thị trên terminal (thường là `http://localhost:8501`).
+Open the URL shown by Streamlit (usually http://localhost:8501).
 
 ---
 
-## 📂 Cấu trúc dự án
+## Project layout
 
 ```
 vexT/
-├── docs/                   # Tài liệu kỹ thuật
-├── infra/                  # Cấu hình Docker
-│   └── docker-compose.yml
-├── res/                    # Thư mục chứa dữ liệu (CSV)
-├── src/                    # Mã nguồn chính
-│   ├── app.py              # Giao diện Streamlit
-│   ├── etl_pipeline.py     # Xử lý dữ liệu & Vector hóa
-│   ├── search_core.py      # Tương tác OpenSearch (Index & Search)
-│   ├── rag_engine.py       # Logic RAG & Gemini
-│   └── pyproject.toml      # Quản lý dependencies
-├── .env                    # Biến môi trường (API Key)
-└── README.md               # Hướng dẫn sử dụng
+├── docs/            # Technical documentation
+├── infra/           # Docker compose for OpenSearch
+├── res/             # Input datasets (e.g. flipkart_data.csv)
+├── src/             # Application source code
+│   ├── app.py       # Streamlit demo
+│   ├── etl_pipeline.py
+│   ├── search_core.py
+│   ├── rag_engine.py
+│   └── pyproject.toml
+├── .env
+└── README.md
 ```
 
-## 📝 Ghi chú
+---
 
-- **Tài khoản OpenSearch mặc định**: `admin` / `StrongPassword123!` (được cấu hình trong `docker-compose.yml`).
-- **Dữ liệu**: Dự án sử dụng tập dữ liệu mẫu Flipkart. Bạn có thể thay đổi mapping trong `etl_pipeline.py` để dùng dữ liệu khác.
+## Notes and tips
+
+- Default OpenSearch credentials (configured in `infra/docker-compose.yml`): `admin` / `StrongPassword123!`.
+- The ETL mapping (column names) is configurable in `src/etl_pipeline.py` to accommodate other datasets.
+- For development, the heap settings in `infra/docker-compose.yml` are conservative; increase them for larger datasets or production use.
+
+If you want, I can also: add a `requirements.txt`, create a small `Makefile` for the common commands, or add unit tests for the ETL and search modules.
