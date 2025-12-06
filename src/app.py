@@ -50,10 +50,10 @@ with st.sidebar:
 
     # Filter 1: Gia tien
     min_price_input = st.slider(
-        "Ngân sách tối thiểu (VNĐ)",
+        "Ngân sách tối thiểu (₹)",
         min_value=0,
-        max_value=50000000,
-        step=500000,
+        max_value=50000,
+        step=100,
         value=0
     )
 
