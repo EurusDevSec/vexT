@@ -102,7 +102,7 @@ if st.button("Search"):
                     st.markdown(f"""
                     <div class="product-card">
                         <h3>{source.get('title','N/A')}</h3>
-                        <p class="price-tag">{source.get('price',0):,.0f} VNĐ</p>
+                        <p class="price-tag">₹{source.get('price',0):,.0f}</p>
                         <p><b>Danh mục:</b> {source.get('category','N/A')}</p>
                         <p style="font-size:0.9em; color:gray">{source.get('content_text','')[:100]}...</p>
                         <hr>

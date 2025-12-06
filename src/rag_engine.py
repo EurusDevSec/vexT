@@ -25,7 +25,7 @@ def build_prompt(user_query, search_results):
     context_text=""
     for i, item in enumerate(search_results):
         source=item['_source']
-        price_str=f"{source['price']:,.0f} VNĐ"
+        price_str=f"₹{source['price']:,.0f}"
         context_text +=f"""
         --- san pham {i+1}
         Ten: {source['title']}
