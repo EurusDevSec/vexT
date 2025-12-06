@@ -24,7 +24,8 @@ COLUMN_MAPPING = {
 DATA_LIMIT = 5000 
 
 print("⏳ Loading model AI...")
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2') # Dùng model đa ngôn ngữ để khớp với search_core
 
 def load_and_map_data(file_path):
     print(f"🔄 Đang đọc file Big Data: {file_path}")

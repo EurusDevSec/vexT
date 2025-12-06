@@ -21,7 +21,8 @@ INDEX_NAME = "vext_products"
 
 # Load model AI
 print("⏳ Đang tải model AI cho tìm kiếm...")
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# model = SentenceTransformer('all-MiniLM-L6-v2') # Model này chỉ tốt tiếng Anh
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2') # Model đa ngôn ngữ (Việt, Anh...)
 
 def create_index():
     print(f"🛠️ Đang thiết lập INDEX_MAPPING cho {INDEX_NAME}...")
@@ -188,7 +189,7 @@ def search_hybrid(user_query, min_price=0, k=10):
         for hit in hits[:3]:  # In ra tối đa 3 dòng demo
             score = hit.get('_score', 0)
             source = hit.get('_source', {})
-            print(f"⭐ Score: {score:.4f} | 🏷️ {source.get('title','N/A')} | 💰 {source.get('price',0):,.0f} VNĐ")
+            print(f"⭐ Score: {score:.4f} | 🏷️ {source.get('title','N/A')} | 💰 ₹{source.get('price',0):,.0f}")
             preview = source.get('content_text', '')[:100]
             print(f"   ℹ️ {preview}...")
             print("-" * 30)
