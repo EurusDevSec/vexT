@@ -58,10 +58,36 @@ def load_and_map_data(file_path):
 def clean_data(df):
     print(f"🧹 Đang làm sạch {len(df)} dòng dữ liệu...")
     
-    # 1. Giới hạn số lượng (Sampling)
+    # 1. Giới hạn số lượng (Sampling) nhưng GIỮ LẠI DEMO DATA
     if len(df) > DATA_LIMIT:
-        print(f"⚠️ Dữ liệu quá lớn ({len(df)} dòng). Lấy ngẫu nhiên {DATA_LIMIT} dòng để demo.")
-        df = df.sample(n=DATA_LIMIT, random_state=42)
+        print(f"⚠️ Dữ liệu quá lớn ({len(df)} dòng).")
+        
+        # Danh sách từ khóa quan trọng cho Demo
+        demo_keywords = [
+            "Alisha Solid Women's Cycling Shorts",
+            "FabHomeDecor Fabric Double Sofa Bed",
+            "Sicons All Purpose Arnica Dog Shampoo",
+            "AW Bellies",
+            "Eternal Gandhi Super Series Crystal Paper Weights"
+        ]
+        
+        # Lọc ra các dòng chứa từ khóa demo (Case insensitive)
+        # Tạo mask: Nếu title chứa bất kỳ keyword nào -> True
+        mask = df['title'].astype(str).apply(lambda x: any(k.lower() in x.lower() for k in demo_keywords))
+        df_demo = df[mask]
+        print(f"   👉 Đã tìm thấy {len(df_demo)} sản phẩm Demo quan trọng.")
+        
+        # Lấy phần còn lại để fill cho đủ DATA_LIMIT
+        df_rest = df[~mask]
+        remaining_count = DATA_LIMIT - len(df_demo)
+        
+        if remaining_count > 0:
+            df_sample = df_rest.sample(n=remaining_count, random_state=42)
+            df = pd.concat([df_demo, df_sample])
+        else:
+            df = df_demo.head(DATA_LIMIT)
+            
+        print(f"   ✅ Đã chốt danh sách {len(df)} dòng (Bao gồm Demo Data).")
     
     # 2. Xử lý Giá tiền (Lọc bỏ chữ, chỉ lấy số)
     # Ví dụ Kaggle hay ghi giá là "20,000 USD" -> cần chuyển thành số
