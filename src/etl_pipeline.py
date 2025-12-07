@@ -19,8 +19,8 @@ COLUMN_MAPPING = {
 }
 
 # 3. GIỚI HẠN DỮ LIỆU (QUAN TRỌNG)
-# Vector hóa tốn nhiều CPU. Để demo mượt, hãy giới hạn 2000-5000 dòng.
-# Đừng tham load cả 100k dòng nếu không có GPU.
+# Vector hóa tốn nhiều CPU. giới hạn 2000-5000 dòng -> giam ap luc cpu
+
 DATA_LIMIT = 5000 
 
 print("⏳ Loading model AI...")
@@ -62,7 +62,7 @@ def clean_data(df):
     if len(df) > DATA_LIMIT:
         print(f"⚠️ Dữ liệu quá lớn ({len(df)} dòng).")
         
-        # Danh sách từ khóa quan trọng cho Demo
+        # Danh sách từ khóa quan trọng 
         demo_keywords = [
             "Alisha Solid Women's Cycling Shorts",
             "FabHomeDecor Fabric Double Sofa Bed",
@@ -90,7 +90,7 @@ def clean_data(df):
         print(f"   ✅ Đã chốt danh sách {len(df)} dòng (Bao gồm Demo Data).")
     
     # 2. Xử lý Giá tiền (Lọc bỏ chữ, chỉ lấy số)
-    # Ví dụ Kaggle hay ghi giá là "20,000 USD" -> cần chuyển thành số
+    # Ví dụ Kaggle hay ghi giá là "20,000 rupee" -> cần chuyển thành số
     if 'price' in df.columns:
         # Ép kiểu số, lỗi thành NaN
         df['price'] = pd.to_numeric(df['price'], errors='coerce')
