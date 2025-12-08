@@ -20,3 +20,5 @@ pyproject.toml
 .python-version
 src/check_models.py
 
+!CODE_OF_CONDUCT.md
+!CONTRIBUTING.md

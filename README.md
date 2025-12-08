@@ -1,103 +1,168 @@
-# vexT — Hybrid Search and RAG
+# vexT — Next-Gen Hybrid Search & RAG Engine
 
 ![Project Banner](image.png)
 
-vexT is a prototype hybrid search and retrieval-augmented generation (RAG) system that combines keyword search (BM25) with semantic vector search to deliver context-aware answers over product data. The project demonstrates an end-to-end pipeline: ETL, embedding, vector indexing (OpenSearch + FAISS), hybrid retrieval, and answer generation via Google Gemini.
+[![Python](https://img.shields.io/badge/Python-3.12%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![OpenSearch](https://img.shields.io/badge/OpenSearch-2.11-005EB8?style=for-the-badge&logo=opensearch&logoColor=white)](https://opensearch.org/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Frontend-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-Key components:
-
-- OpenSearch (vector-enabled) as the search backend
-- SentenceTransformers (`all-MiniLM-L6-v2`) for embeddings
-- Google Gemini (via Google GenAI SDK) for RAG response generation
-- Streamlit for a simple web UI
-
----
-
-## Features
-
-- Hybrid retrieval: BM25 (text) + approximate k-NN (vector) using HNSW + FAISS
-- RAG: contextual answer synthesis using retrieved documents
-- ETL pipeline to normalize and convert product CSV into indexed documents
-- Streamlit demo app for interactive search and question answering
+**vexT** is a state-of-the-art (SOTA) prototype for **Hybrid Search** and **Retrieval-Augmented Generation (RAG)**. It bridges the gap between traditional keyword search and modern semantic understanding, delivering precise, context-aware answers for e-commerce product data.
 
 ---
 
-## Requirements
+## 🚀 Key Features
 
-- Docker Desktop (to run the OpenSearch cluster)
-- Python 3.12+
-- A Google Cloud API key with access to the GenAI endpoint (set via `GOOGLE_API_KEY`)
+*   **🧠 Hybrid Retrieval Engine**: Combines the precision of **BM25** (Keyword Search) with the semantic understanding of **k-NN HNSW** (Vector Search) using OpenSearch.
+*   **🤖 Generative AI (RAG)**: Integrates **Google Gemini 2.5 Flash** to synthesize natural language answers based on retrieved product context.
+*   **🌍 Multilingual Support**: Powered by `paraphrase-multilingual-MiniLM-L12-v2`, enabling seamless search in English, Vietnamese, and more.
+*   **⚡ High-Performance Infrastructure**: Dockerized OpenSearch cluster with optimized HNSW settings (`m=16`, `ef_construction=128`).
+*   **🛠️ Automated ETL Pipeline**: Robust data processing pipeline that handles cleaning, sampling, and vectorization of large datasets.
+*   **📊 Interactive UI**: A clean, responsive Streamlit interface for real-time testing and demonstration.
 
 ---
 
-## Quickstart
+## 🏗️ Architecture
 
-Follow these steps to run the project locally.
+The system follows a modular architecture:
 
-1. Clone the repository
+1.  **Data Ingestion (Offline)**: Raw CSV data is processed, vectorized, and indexed into OpenSearch.
+2.  **Search Runtime (Online)**: User queries are vectorized and sent to OpenSearch via a Hybrid Query DSL.
+3.  **RAG Inference**: Top results are injected into a prompt context for Gemini to generate the final response.
+
+*(See `docs/system_workflow_detailed.md` for a deep dive into the internal workflow)*
+
+---
+
+## 🛠️ Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+*   **Docker Desktop**: For running the OpenSearch cluster.
+*   **Python 3.12+**: The core programming language.
+*   **uv** (Recommended): An extremely fast Python package installer and resolver.
+*   **Google Cloud API Key**: Access to Gemini models.
+
+---
+
+## ⚡ Quick Start
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/EurusDevSec/vexT.git
 cd vexT
 ```
 
-2. Configure environment variables
+### 2. Environment Setup
 
-Create a `.env` file in the repository root with your Google API key:
+Create a `.env` file in the root directory:
 
 ```env
 GOOGLE_API_KEY=your_google_api_key_here
 ```
 
-3. Install Python dependencies
+### 3. Install Dependencies
 
-The project uses `uv` for dependency management; you can use it if available, otherwise use `pip`.
-
-Recommended (uv):
+We recommend using `uv` for lightning-fast setup:
 
 ```bash
 cd src
 uv sync
 ```
 
-Alternative (pip):
+*(Alternatively, use `pip install -r requirements.txt` if you prefer standard pip)*
+
+### 4. Start Infrastructure
+
+Launch the OpenSearch cluster using Docker Compose. Note that we use custom ports (`10200`, `10600`) to avoid conflicts on Windows.
 
 ```bash
-pip install -r requirements.txt
-# or install packages manually from src/pyproject.toml
+# From project root
+docker-compose -f infra/docker-compose.yml up -d
 ```
 
-4. Start OpenSearch
+*Wait ~30 seconds for the cluster to initialize.*
 
-From the `infra/` directory:
+### 5. Run ETL Pipeline
+
+Process the data and generate vectors. This step includes smart sampling to preserve demo scenarios.
 
 ```bash
-cd infra
-docker-compose up -d
+# From src/ directory
+uv run etl_pipeline.py
 ```
 
-Allow 1–2 minutes for OpenSearch to fully initialize.
+### 6. Index Data
 
-5. Run the ETL pipeline
-
-Place your `flipkart_data.csv` file inside the `res/` folder, then run:
+Create the index mapping and ingest data into OpenSearch.
 
 ```bash
-# from project root
-cd src
-uv run etl_pipeline.py   # or: python etl_pipeline.py
+uv run search_core.py
 ```
 
-This will normalize the CSV, generate embeddings, and export a JSON file ready for indexing.
+### 7. Launch Application
 
-6. Index data into OpenSearch
+Start the Streamlit frontend.
 
 ```bash
-cd src
-uv run search_core.py    # or: python search_core.py
+uv run streamlit run app.py
 ```
 
-7. Launch the demo UI
+Access the app at: `http://localhost:8501`
+
+---
+
+## 📂 Project Structure
+
+```
+vexT/
+├── docs/                   # Documentation & Architecture plans
+├── infra/                  # Infrastructure (Docker Compose)
+│   └── docker-compose.yml
+├── res/                    # Resources (Data files)
+│   ├── flipkart_data.csv
+│   └── flipkart_data_ready.json
+├── src/                    # Source Code
+│   ├── app.py              # Streamlit Frontend
+│   ├── etl_pipeline.py     # Data Processing & Vectorization
+│   ├── rag_engine.py       # Gemini AI Integration
+│   └── search_core.py      # OpenSearch Logic
+├── .env                    # Environment Variables
+├── CODE_OF_CONDUCT.md      # Community Standards
+├── CONTRIBUTING.md         # Contribution Guidelines
+└── README.md               # Project Documentation
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+---
+
+## 📜 Code of Conduct
+
+We are committed to providing a friendly, safe, and welcoming environment for all. Please review our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+## 📞 Contact
+
+**EurusDevSec** - [GitHub Profile](https://github.com/EurusDevSec)
+
+Project Link: [https://github.com/EurusDevSec/vexT](https://github.com/EurusDevSec/vexT)
+
 
 ```bash
 cd src
