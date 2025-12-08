@@ -14,12 +14,12 @@
 
 ## 🚀 Key Features
 
-*   **🧠 Hybrid Retrieval Engine**: Combines the precision of **BM25** (Keyword Search) with the semantic understanding of **k-NN HNSW** (Vector Search) using OpenSearch.
-*   **🤖 Generative AI (RAG)**: Integrates **Google Gemini 2.5 Flash** to synthesize natural language answers based on retrieved product context.
-*   **🌍 Multilingual Support**: Powered by `paraphrase-multilingual-MiniLM-L12-v2`, enabling seamless search in English, Vietnamese, and more.
-*   **⚡ High-Performance Infrastructure**: Dockerized OpenSearch cluster with optimized HNSW settings (`m=16`, `ef_construction=128`).
-*   **🛠️ Automated ETL Pipeline**: Robust data processing pipeline that handles cleaning, sampling, and vectorization of large datasets.
-*   **📊 Interactive UI**: A clean, responsive Streamlit interface for real-time testing and demonstration.
+- **🧠 Hybrid Retrieval Engine**: Combines the precision of **BM25** (Keyword Search) with the semantic understanding of **k-NN HNSW** (Vector Search) using OpenSearch.
+- **🤖 Generative AI (RAG)**: Integrates **Google Gemini 2.5 Flash** to synthesize natural language answers based on retrieved product context.
+- **🌍 Multilingual Support**: Powered by `paraphrase-multilingual-MiniLM-L12-v2`, enabling seamless search in English, Vietnamese, and more.
+- **⚡ High-Performance Infrastructure**: Dockerized OpenSearch cluster with optimized HNSW settings (`m=16`, `ef_construction=128`).
+- **🛠️ Automated ETL Pipeline**: Robust data processing pipeline that handles cleaning, sampling, and vectorization of large datasets.
+- **📊 Interactive UI**: A clean, responsive Streamlit interface for real-time testing and demonstration.
 
 ---
 
@@ -31,7 +31,7 @@ The system follows a modular architecture:
 2.  **Search Runtime (Online)**: User queries are vectorized and sent to OpenSearch via a Hybrid Query DSL.
 3.  **RAG Inference**: Top results are injected into a prompt context for Gemini to generate the final response.
 
-*(See `docs/system_workflow_detailed.md` for a deep dive into the internal workflow)*
+_(See `docs/system_workflow_detailed.md` for a deep dive into the internal workflow)_
 
 ---
 
@@ -39,10 +39,10 @@ The system follows a modular architecture:
 
 Before you begin, ensure you have the following installed:
 
-*   **Docker Desktop**: For running the OpenSearch cluster.
-*   **Python 3.12+**: The core programming language.
-*   **uv** (Recommended): An extremely fast Python package installer and resolver.
-*   **Google Cloud API Key**: Access to Gemini models.
+- **Docker Desktop**: For running the OpenSearch cluster.
+- **Python 3.12+**: The core programming language.
+- **uv** (Recommended): An extremely fast Python package installer and resolver.
+- **Google Cloud API Key**: Access to Gemini models.
 
 ---
 
@@ -72,7 +72,7 @@ cd src
 uv sync
 ```
 
-*(Alternatively, use `pip install -r requirements.txt` if you prefer standard pip)*
+_(Alternatively, use `pip install -r requirements.txt` if you prefer standard pip)_
 
 ### 4. Start Infrastructure
 
@@ -83,7 +83,7 @@ Launch the OpenSearch cluster using Docker Compose. Note that we use custom port
 docker-compose -f infra/docker-compose.yml up -d
 ```
 
-*Wait ~30 seconds for the cluster to initialize.*
+_Wait ~30 seconds for the cluster to initialize._
 
 ### 5. Run ETL Pipeline
 
@@ -162,7 +162,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 **EurusDevSec** - [GitHub Profile](https://github.com/EurusDevSec)
 
 Project Link: [https://github.com/EurusDevSec/vexT](https://github.com/EurusDevSec/vexT)
-
 
 ```bash
 cd src
