@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 auth = ('admin', 'StrongPassword123!')  # Mật khẩu đã set trong docker-compose.yml
 
 client = OpenSearch(
-    hosts=[{'host': 'localhost', 'port': 9200}],
+    hosts=[{'host': 'localhost', 'port': 10200}],
     http_compress=True,
     http_auth=auth,         # Thêm xác thực Basic Auth
     use_ssl=True,           # Bật SSL vì OpenSearch mặc định dùng HTTPS
